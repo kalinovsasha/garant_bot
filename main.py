@@ -1,12 +1,13 @@
 import asyncio
-import aiohttp
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command, CommandObject
-from aiogram.types import Message
+from aiogram.types import Message, BufferedInputFile
 from utils.mikrotik import Mikrotik
 import json
 import os
 from dotenv import load_dotenv
+from utils.graphics import Zabbix_graphic
+
 
 # Загрузить .env
 load_dotenv()
@@ -19,6 +20,8 @@ dp = Dispatcher()
 
 # Инициализация ipoe браса
 ipoe_brases = Mikrotik(os.getenv("IPOE_LOGIN"), os.getenv("IPOE_PASSWORD"))
+get_btk_graph = Zabbix_graphic(
+    os.getenv("ZAB_LOGIN"), os.getenv("ZAB_PASSWORD"))
 
 
 @dp.message(Command('start'))
@@ -30,6 +33,11 @@ async def cmd_start(message: types.Message):
 async def cmd_help(message: types.Message):
     await message.answer(" \
                         скорость тарифа:\n /cmd print_q <ip брас> <ip абонента>\nПример: /cmd print_q 172.16.9.24 100.71.56.11")
+
+@dp.message(Command('btk'))
+async def cmd_btk(message: types.Message):
+    photo = BufferedInputFile(get_btk_graph.download(), filename="graph.png")
+    await message.answer_photo(photo, caption="График из Zabbix")
 
 
 # С обработкой команды
@@ -69,8 +77,9 @@ async def mes(message: types.Message):
     text = message.text.lower()
     await message.answer(text)
 
+
 async def main():
-    print("Hello from garant-bot!")
+    print("Bot_started")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
