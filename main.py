@@ -32,7 +32,12 @@ async def cmd_start(message: types.Message):
 @dp.message(Command('help'))
 async def cmd_help(message: types.Message):
     await message.answer(" \
-                        скорость тарифа:\n /cmd print_q <ip брас> <ip абонента>\nПример: /cmd print_q 172.16.9.24 100.71.56.11")
+скорость тарифа:\n /cmd print_q <ip брас> <ip абонента>\n\
+Пример:\n/cmd print_q 172.16.9.24 100.71.56.11\n\
+График внешнего канала: /btk \n\
+Посмотреть ACL лист:\n/cmd print_acl <ip абонента> \n\
+Удалить Lease:\n/cmd drop_clien <ip абонента>")
+
 
 @dp.message(Command('btk'))
 async def cmd_btk(message: types.Message):
@@ -72,6 +77,8 @@ async def handle_comand(message: Message, command: CommandObject):
         print(e)
 
 # Ответы на обычный текст
+
+
 @dp.message()
 async def mes(message: types.Message):
     text = message.text.lower()
