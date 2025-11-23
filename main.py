@@ -36,7 +36,7 @@ async def cmd_help(message: types.Message):
 Пример:\n/cmd print_q 172.16.9.24 100.71.56.11\n\
 График внешнего канала: /btk \n\
 Посмотреть ACL лист:\n/cmd print_acl <ip абонента> \n\
-Удалить Lease:\n/cmd drop_clien <ip абонента>")
+Удалить Lease:\n/cmd drop_client <ip абонента>")
 
 
 @dp.message(Command('btk'))
@@ -65,12 +65,8 @@ async def handle_comand(message: Message, command: CommandObject):
                     return "Останавливаем процесс..."
                 case "drop_client":
                     await message.answer(ipoe_brases.remove_lease_ip(commands[1]))
-                case "zaglushkaa":
-                    return "Статус: активен"
-                case "zaglushka":
-                    return "Статус: активен"
-                case _:
-                    return "Неизвестная команда"
+                case _ :
+                    await message.answer("Неверная команда")
         else:
             await message.answer("Укажите команду: /cmd <команда>")
     except Exception as e:
