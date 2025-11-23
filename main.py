@@ -35,29 +35,33 @@ async def cmd_help(message: types.Message):
 # С обработкой команды
 @dp.message(Command("cmd"))
 async def handle_comand(message: Message, command: CommandObject):
-    if command.args:
-        commands: list[str] = command.args.split()
-        cmd = commands
-        await message.answer(f"Выполняю команду: {cmd}")
-        match commands[0]:
-            # В commands[1] придет ip браса, в commands[2] ip абонента
-            case "print_q":
-                print(f'{commands[1]}, {commands[2]}')
-                # Вывод информации о скорости
-                await message.answer(ipoe_brases.print_que(commands[1], commands[2]))
-            # В commands[1] придет ip абонента
-            case "print_acl":
-                await message.answer(ipoe_brases.print_acl(commands[1]))
-                return "Останавливаем процесс..."
-            case "drop_client":
-                return "Перезапускаем..."
-            case "status":
-                return "Статус: активен"
-            case _:
-                return "Неизвестная команда"
-
-    else:
-        await message.answer("Укажите команду: /cmd <команда>")
+    try:
+        if command.args:
+            commands: list[str] = command.args.split()
+            cmd = commands
+            await message.answer(f"Выполняю команду: {cmd}")
+            match commands[0]:
+                # В commands[1] придет ip браса, в commands[2] ip абонента
+                case "print_q":
+                    print(f'{commands[1]}, {commands[2]}')
+                    # Вывод информации о скорости
+                    await message.answer(ipoe_brases.print_que(commands[1], commands[2]))
+                # В commands[1] придет ip абонента
+                case "print_acl":
+                    await message.answer(ipoe_brases.print_acl(commands[1]))
+                    return "Останавливаем процесс..."
+                case "drop_client":
+                    await message.answer(ipoe_brases.remove_lease_ip(commands[1]))
+                case "zaglushkaa":
+                    return "Статус: активен"
+                case "zaglushka":
+                    return "Статус: активен"
+                case _:
+                    return "Неизвестная команда"
+        else:
+            await message.answer("Укажите команду: /cmd <команда>")
+    except Exception as e:
+        print(e)
 
 # Ответы на обычный текст
 @dp.message()
@@ -65,11 +69,9 @@ async def mes(message: types.Message):
     text = message.text.lower()
     await message.answer(text)
 
-
 async def main():
     print("Hello from garant-bot!")
     await dp.start_polling(bot)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
