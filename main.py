@@ -12,34 +12,54 @@ from dotenv import load_dotenv
 load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
-# Задаем ипишники брасов
-bras_servers = {
-    "ipoe24": "172.16.9.24"
-}
-
 
 # Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+# Инициализация ipoe браса
+ipoe_brases = Mikrotik(os.getenv("IPOE_LOGIN"), os.getenv("IPOE_PASSWORD"))
+
 
 @dp.message(Command('start'))
 async def cmd_start(message: types.Message):
-    await message.answer("Ку")
+    await message.answer(" Введите /help для справки")
+
+
+@dp.message(Command('help'))
+async def cmd_help(message: types.Message):
+    await message.answer(" \
+                        скорость тарифа:\n /cmd print_q <ip брас> <ip абонента>\nПример: /cmd print_q 172.16.9.24 100.71.56.11")
 
 
 # С обработкой команды
 @dp.message(Command("cmd"))
 async def handle_comand(message: Message, command: CommandObject):
     if command.args:
-        cmd = command.args
+        commands: list[str] = command.args.split()
+        cmd = commands
         await message.answer(f"Выполняю команду: {cmd}")
+        match commands[0]:
+            # В commands[1] придет ip браса, в commands[2] ip абонента
+            case "print_q":
+                print(f'{commands[1]}, {commands[2]}')
+                # Вывод информации о скорости
+                await message.answer(ipoe_brases.print_que(commands[1], commands[2]))
+            # В commands[1] придет ip абонента
+            case "print_acl":
+                await message.answer(ipoe_brases.print_acl(commands[1]))
+                return "Останавливаем процесс..."
+            case "drop_client":
+                return "Перезапускаем..."
+            case "status":
+                return "Статус: активен"
+            case _:
+                return "Неизвестная команда"
+
     else:
-        await message.answer("Укажите команду: /comand <команда>")
+        await message.answer("Укажите команду: /cmd <команда>")
 
 # Ответы на обычный текст
-
-
 @dp.message()
 async def mes(message: types.Message):
     text = message.text.lower()
