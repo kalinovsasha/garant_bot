@@ -1,0 +1,8 @@
+FROM python:3.12-trixie
+WORKDIR /app
+RUN pip install uv
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+COPY . .
+RUN /app/venv/bin/activate
+CMD ["python", "main.py"]
