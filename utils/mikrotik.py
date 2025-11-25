@@ -2,8 +2,12 @@
 # ip dhcp-server lease remove [find mac-address="C0:25:E9:08:BD:C9"] - по маку
 # ip firewall address-list print  where address="100.70.19.13 - вывести в каком адреслисте
 # queue simple print where target="100.70.56.6/32" -вывести скоростные параметры
+# queue simple remove <l2tp-dcxk9h> -снести q
+#queue simple remove [find target="100.70.19.5/32"]
+
 import paramiko
 funeral: tuple = []
+
 
 class Mikrotik:
     def __init__(self, login: str, password: str) -> None:
@@ -13,6 +17,8 @@ class Mikrotik:
         self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     def print_que(self, server: str, client_ip: str) -> None:
+        if not server:
+            return "Не вено введен сервер"
         try:
             # подключается по ssh
             self.ssh.connect(server,
@@ -37,6 +43,8 @@ class Mikrotik:
 
     def print_acl(self, client_ip: str):
         server = self.detect_bras_ip(client_ip)
+        if not server:
+            return "Не вено введен сервер"
         try:
             # подключается по ssh
             self.ssh.connect(server,
@@ -59,6 +67,8 @@ class Mikrotik:
 
     def remove_lease_ip(self, client_ip: str) -> None:
         server = self.detect_bras_ip(client_ip)
+        if not server:
+            return "Не вено введен сервер"
         try:
             # подключается по ssh
             self.ssh.connect(server,
@@ -76,14 +86,34 @@ class Mikrotik:
         except Exception as e:
             return f"Error {e}"
 
+    def set_unlim(self, client_ip: str):
+        server = self.detect_bras_ip(client_ip)
+        if not server:
+            return "Не вено введен сервер"
+        try:
+            # подключается по ssh
+            self.ssh.connect(server,
+                             username=self.login,
+                             password=self.password,
+                             look_for_keys=False,
+                             allow_agent=False,
+                             timeout=10)
+            # вводит команду и и cохраняет stdin, stdout, stderr
+            _, stdout, _ = self.ssh.exec_command(
+                f'queue simple remove [find target="{client_ip}/32"]')
+            self.ssh.close()
+            return f'Команда на удаление {client_ip} отправлена на {server}'
+        except Exception as e:
+            return f"Error {e}"
+
     # Вычисляет Ip браса по ip клиента
     def detect_bras_ip(self, client_ip: str) -> str:
         client = client_ip.split('.')
-        match client[1]:
-            case "71":
-                return "172.16.9.24"
-            case "70":
-                return "172.16.9.21"
-            case "72":
-                return "172.16.9.23"
-        return "Введен не верный, либо не ipoe адрес"
+        if int(client[1]) == 70:
+            return "172.16.9.21"
+        elif int(client[1]) == 71:
+            return "172.16.9.24"
+        elif int(client[1]) == 72:
+            return "172.16.9.23"
+        else:
+            return None

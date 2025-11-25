@@ -65,6 +65,9 @@ async def handle_comand(message: Message, command: CommandObject):
                     return "Останавливаем процесс..."
                 case "drop_client":
                     await message.answer(ipoe_brases.remove_lease_ip(commands[1]))
+                ############Секретная команда, делает анлим
+                case "unlim":
+                    await message.answer(ipoe_brases.set_unlim(commands[1]))
                 case _ :
                     await message.answer("Неверная команда")
         else:
