@@ -8,6 +8,13 @@ import os
 from dotenv import load_dotenv
 from utils.graphics import Zabbix_graphic
 
+""" 
+Команды на получение чата и имени
+print(message.from_user.full_name)
+print(message.from_user.id)
+"""
+
+
 # Загрузить .env
 load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -18,11 +25,12 @@ dp = Dispatcher()
 
 # Инициализация ipoe браса
 ipoe_brases = Mikrotik(os.getenv("IPOE_LOGIN"), os.getenv("IPOE_PASSWORD"))
+
 get_btk_graph = Zabbix_graphic(
-    os.getenv("ZAB_LOGIN"), os.getenv("ZAB_PASSWORD"),"btk")
+    os.getenv("ZAB_LOGIN"), os.getenv("ZAB_PASSWORD"), "btk")
 
 get_lancache_graph = Zabbix_graphic(
-    os.getenv("ZAB_LOGIN"), os.getenv("ZAB_PASSWORD"),"lancache")
+    os.getenv("ZAB_LOGIN"), os.getenv("ZAB_PASSWORD"), "lancache")
 
 
 @dp.message(Command('start'))
@@ -46,9 +54,11 @@ async def cmd_btk(message: types.Message):
     photo = BufferedInputFile(get_btk_graph.download(), filename="graph.png")
     await message.answer_photo(photo, caption="График BTK")
 
+
 @dp.message(Command('lancache'))
 async def cmd_lancache(message: types.Message):
-    photo = BufferedInputFile(get_lancache_graph.download(), filename="graph.png")
+    photo = BufferedInputFile(
+        get_lancache_graph.download(), filename="graph.png")
     await message.answer_photo(photo, caption="График кеш steam")
 
 
