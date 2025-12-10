@@ -21,6 +21,8 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 # Создаем базу с пользователями
 base = Users_base("./db/users.db")
+#Если нужно добавить админа или юзера вручную
+#base.create_tguser(tgid,"name" , access_level, "description")
 
 # Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
@@ -55,12 +57,28 @@ async def cmd_help(message: types.Message):
 
 @dp.message(Command('btk'))
 async def cmd_btk(message: types.Message):
+    user = base.read_user(message.from_user.id)
+    if user:
+        if user[3] <= 2: 
+            await message.answer(f'Недостаточно прав для этой команды')
+            return None
+    else:
+        await message.answer(f'Недостаточно прав для этой команды')
+        return None
     photo = BufferedInputFile(get_btk_graph.download(), filename="graph.png")
     await message.answer_photo(photo, caption="График BTK")
 
 
 @dp.message(Command('lancache'))
 async def cmd_lancache(message: types.Message):
+    user = base.read_user(message.from_user.id)
+    if user:
+        if user[3] <= 2: 
+            await message.answer(f'Недостаточно прав для этой команды')
+            return None
+    else:
+        await message.answer(f'Недостаточно прав для этой команды')
+        return None
     photo = BufferedInputFile(
         get_lancache_graph.download(), filename="graph.png")
     await message.answer_photo(photo, caption="График кеш steam")
@@ -69,6 +87,18 @@ async def cmd_lancache(message: types.Message):
 # С обработкой команды
 @dp.message(Command("cmd"))
 async def handle_comand(message: Message, command: CommandObject):
+    if not command.args:
+        await message.answer("Нет аргументов")
+        return
+    user = base.read_user(message.from_user.id)
+    if user:
+        if user[3] <= 1: 
+            await message.answer(f'Недостаточно прав для этой команды')
+            return None
+    else:
+        await message.answer(f'Недостаточно прав для этой команды')
+        return None
+    
     try:
         if command.args:
             commands: list[str] = command.args.split()
@@ -82,7 +112,6 @@ async def handle_comand(message: Message, command: CommandObject):
                 # В commands[1] придет ip абонента
                 case "print_acl":
                     await message.answer(ipoe_brases.print_acl(commands[1]))
-                    return "Останавливаем процесс..."
                 case "drop_client":
                     await message.answer(ipoe_brases.remove_lease_ip(commands[1]))
                 # Секретная команда, делает анлим
@@ -105,12 +134,16 @@ async def get_tgid(message: Message, command: CommandObject):
 async def get_sys(message: Message, command: CommandObject):
     if not command.args:
         await message.answer("Нет аргументов")
-        return
+        return None
     user = base.read_user(message.from_user.id)
     if user:
         if user[3] != 3: 
             await message.answer(f'Недостаточно прав для этой команды')
-            return 
+            return None
+    else:
+        await message.answer(f'Недостаточно прав для этой команды')
+        return None
+        
     cmd: list[str] = command.args.split()
     try:
 
